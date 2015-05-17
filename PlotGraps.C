@@ -1,9 +1,9 @@
 {
   TFile f("epics.root");
-  TGraph *g1=(TGraph *)f.Get("IPM2H01.VAL");
-  TGraph *g2=(TGraph *)f.Get("IPM2H00.YPOS");
-  TGraph *g3=(TGraph *)f.Get("IPM2H01.YPOS");
-  TGraph *g4=(TGraph *)f.Get("IPM2H02.YPOS");
+  TGraph *g1=(TGraph *)f.Get("IPM2H01_VAL");
+  TGraph *g2=(TGraph *)f.Get("IPM2H00_YPOS");
+  TGraph *g3=(TGraph *)f.Get("IPM2H01_YPOS");
+  TGraph *g4=(TGraph *)f.Get("IPM2H02_YPOS");
   TCanvas *cc= new TCanvas("cc","BPMs",1400,500);
   cc->cd();
   TLatex *t1 = new TLatex(0.1,0.93,"2H01.Cur");

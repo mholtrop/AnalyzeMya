@@ -10,10 +10,21 @@
   TGraph *g5 = new TGraph(*g_t);
   TGraph *g_sc=(TGraph *)f.Get("HPS_SC");
   TGraph *g6 = new TGraph(*g_sc);
+  TGraph *g7=(TGraph *)f.Get("Delta_IPM2C21A_YPOS");
+  TGraph *g8=(TGraph *)f.Get("Delta_IPM2C24A_YPOS");
+
+  double fcup_scale = 1E-2;
+  char fcup_scale_txt[] = "FCUP*10^{-2}";
+
+  double hps_t_scale = 1.e-5;
+  char hps_t_scale_txt[] = "HPS_T*1.*10^{-5}";
+
+  double hps_sc_scale = 0.16e-5;
+  char hps_sc_scale_txt[] = "HPS_SC*0.16*10^{-5}";
 
   TCanvas *cc= new TCanvas("cc","BPMs",1400,500);
   cc->cd();
-  TLatex *t1 = new TLatex(0.1,0.93,"FCUP*10^{-2}");
+  TLatex *t1 = new TLatex(0.1,0.93,fcup_scale_txt);
   t1->SetTextColor(7);
   t1->Draw();
 
@@ -25,14 +36,13 @@
   t4->SetTextColor(kBlue);
   t4->Draw();
 
-  TLatex *t5 = new TLatex(0.5,0.93,"HPS_T*0.7*10^{-5}");
+  TLatex *t5 = new TLatex(0.5,0.93,hps_t_scale_txt);
   t5->SetTextColor(kBlack);
   t5->Draw();
 
-  TLatex *t6 = new TLatex(0.65,0.93,"HPS_SC*0.2*10^{-5}");
+  TLatex *t6 = new TLatex(0.65,0.93,hps_sc_scale_txt);
   t6->SetTextColor(kBrown);
   t6->Draw();
-
 
   TPad *p1=new TPad("p1","",0,0,1,1);
   p1->SetFillColor(0);
@@ -51,7 +61,7 @@
   g2->SetMaximum(1.);
   g2->Draw("AL");
 
-  for (int i=0;i<g1->GetN();i++) g1->GetY()[i] = g_fc->GetY()[i]*1E-2;  //  Scale
+  for (int i=0;i<g1->GetN();i++) g1->GetY()[i] = g_fc->GetY()[i]*fcup_scale;  //  Scale
   g1->SetTitle("");
   g1->SetLineColor(7);
   g1->SetLineWidth(2);
@@ -69,18 +79,20 @@
   g4->Draw("L");
 
 
-  for (int i=0;i<g5->GetN();i++) g5->GetY()[i] = g_t->GetY()[i]*0.7E-5;  //  Move Down by 1.5
+  for (int i=0;i<g5->GetN();i++) g5->GetY()[i] = g_t->GetY()[i]*hps_t_scale;  //  Move Down by 1.5
   g5->SetTitle("");
   g5->SetLineColor(kBlack);
   g5->SetLineWidth(2);
   g5->Draw("L");
 
-  for (int i=0;i<g6->GetN();i++) g6->GetY()[i] = g_sc->GetY()[i]*0.2E-5;  //  Move Down by 1.5
+  for (int i=0;i<g6->GetN();i++) g6->GetY()[i] = g_sc->GetY()[i]*hps_sc_scale;  //  Move Down by 1.5
   g6->SetTitle("");
   g6->SetLineColor(kBrown);
   g6->SetLineWidth(2);
   g6->Draw("L");
 
+  g7->SetLineColor(kGreen);
+  g8->SetLineColor(kYellow)
 
   //  TMultiGraph *mg = new TMultiGraph();
   //mg->Add(g1,"L");
