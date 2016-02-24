@@ -11,7 +11,20 @@ def dtime(value):
     """ Special function to parse the -b and -e command line args, which may contain a - """
     return value
 
+def convert_to_float(val):
+    """ A more tolerant converter than the float() call, catches some exceptions. """
 
+    try:
+        out = float(val)
+    except ValueError:
+        if val == "<undefined>":
+            out = 0
+        else:
+            print "Unexpected value: ",val
+            out= None
+
+    return out
+        
 def main(argv=None):
     if argv is None:
         argv=sys.argv
@@ -193,7 +206,7 @@ Note: If you request a long time span, the myData command will take a long time.
             sys.exit(9)
      
         for i in range(len(values)):     # Needed to get the data into the TTree
-            tree_data[i][0] = values[i]
+            tree_data[i][0] = convert_to_float(values[i])
 
 
         delta_time = (last_time - Zero_time).total_seconds() 
@@ -204,7 +217,7 @@ Note: If you request a long time span, the myData command will take a long time.
         root_tree.Fill()
 
         for i in range(len(values)):
-            graph_data[i].append(values[i])    # Store column wise.            
+            graph_data[i].append(convert_to_float(values[i]))    # Store column wise.            
         
     
     # END of file read. Now process the data into the graphs.
