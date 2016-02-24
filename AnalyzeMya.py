@@ -132,8 +132,6 @@ Note: If you request a long time span, the myData command will take a long time.
 
     headers = ll.split()[1:] # First is "Date"
 
-
-
     ####### READ the first line from the data #########
     
     ll=ff.readline()         # Values, first 2 are Date Time
