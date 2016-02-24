@@ -81,10 +81,19 @@ Note: If you request a long time span, the myData command will take a long time.
     if args.begin and ( args.begin[0] == 'x' or args.begin[0] == 'X'):  args.begin=args.begin[1:]
     if args.end   and ( args.end[0] == 'x' or args.end[0] == 'X'):  args.end=args.end[1:]
                 
+    if args.debug>1:
+        print("Arguments parsed:")
+        if args.begin: print(" --begin "+str(args.begin))
+        if args.end:   print(" --end   "+str(args.end))
+
     if args.interactive:
         canv = ROOT.TCanvas("canv","Canvas",800,600);
 
     outfile="epics.root"
+
+    if args.outfile:
+        outfile = args.outfile
+
     if args.file:
         if args.file[-3:] == ".gz": args.gzip = True
 
@@ -94,27 +103,29 @@ Note: If you request a long time span, the myData command will take a long time.
             ff = pipe.stdout
         else:
             ff=open(args.file)        
-        
-        if args.outfile:
-            outfile = args.outfile
-        else:
+
+        if not args.outfile:
             outfile = args.file[0:args.file.find('.')] +".root"
 
+        
     else:
         if args.begin is None or args.end is None:
             print "Please specify begin and end on the command line, or specify an input file. "
             return(9)
 
-        command_line = ["myData",'-b "'+args.begin+'"','-e "'+args.end+'"',"-p "+str(args.precision)] + args.epics_channels
+        # According to Popen doc, the command line should be split, but this doesn't actually work.
+        #        command_line = ["myData",'-b "'+args.begin+'"','-e "'+args.end+'"',"-p "+str(args.precision)] + args.epics_channels
+
+        command_line = " ".join(["myData",'-b "'+args.begin+'"','-e "'+args.end+'"',"-p "+str(args.precision)] + args.epics_channels)
         if args.tryout:
-            print "Command: "," ".join(command_line)
+            print("Command: "+command_line)
             return(1)
+
+        if args.debug:
+            print("Subprocess line: "+command_line)
 
         pipe = subprocess.Popen(command_line,shell=True, bufsize=1024*1024, stdout=subprocess.PIPE)
         ff = pipe.stdout
-
-
-        ######### TO DO: Pipe the myData command. ##############
 
 
     root_file = ROOT.TFile(outfile,"RECREATE")
@@ -122,6 +133,8 @@ Note: If you request a long time span, the myData command will take a long time.
 
     ll=ff.readline()  # First line is the headers.
 
+    if args.debug:
+        print("First line:"+str(ll))
 
     #####  HEADER TRANSLATION #### HPS SPECIFIC  ############
 
@@ -135,6 +148,10 @@ Note: If you request a long time span, the myData command will take a long time.
     ####### READ the first line from the data #########
     
     ll=ff.readline()         # Values, first 2 are Date Time
+
+    if args.debug:
+        print("Second line:"+str(ll))
+
     (date,time) = ll.split()[0:2]
     
     if args.precision:
