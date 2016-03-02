@@ -1,27 +1,52 @@
-void PlotGraphs(const char * file){
+
+TGraph *g_fc;
+TGraph *g1;
+TGraph *g2;
+TGraph *g3;
+TGraph *g4;
+TGraph *g_t;
+TGraph *g5 ;
+TGraph *g_sc;
+TGraph *g6 ;
+TGraph *g7;
+TGraph *g8;
+
+TGraph *g2_x;
+TGraph *g3_x;
+TGraph *g4_x;
+TGraph *g7_x;
+TGraph *g8_x;
+
+TCanvas *cc_y, *cc_x;
+TPad    *p1y,*p1x;
+
+void PlotGraphs(string file,double ymin=-1.,double ymax=+1.){
   // Open file.
 
-  TString fnam(file);
-  TFile *f=new TFile(fnam+".root");
+  gSystem->Setenv("TZ","America/New_York");
+
+  TFile *f=new TFile(file.data());
+
+  string fnam = file.substr(0,file.find(".root"));
 
   int kBrown=45;
-  TGraph *g_fc=(TGraph *)f->Get("FCUP");
-  TGraph *g1=new TGraph(*g_fc);    // Make a copy, since we'll scale it.
-  TGraph *g2=(TGraph *)f->Get("Delta_IPM2H00_YPOS");
-  TGraph *g3=(TGraph *)f->Get("Delta_IPM2H01_YPOS");
-  TGraph *g4=(TGraph *)f->Get("Delta_IPM2H02_YPOS");
-  TGraph *g_t=(TGraph *)f->Get("HPS_T");
-  TGraph *g5 = new TGraph(*g_t);
-  TGraph *g_sc=(TGraph *)f->Get("HPS_SC");
-  TGraph *g6 = new TGraph(*g_sc);
-  TGraph *g7=(TGraph *)f->Get("Delta_IPM2C21A_YPOS");
-  TGraph *g8=(TGraph *)f->Get("Delta_IPM2C24A_YPOS");
-
-  TGraph *g2_x=(TGraph *)f->Get("Delta_IPM2H00_XPOS");
-  TGraph *g3_x=(TGraph *)f->Get("Delta_IPM2H01_XPOS");
-  TGraph *g4_x=(TGraph *)f->Get("Delta_IPM2H02_XPOS");
-  TGraph *g7_x=(TGraph *)f->Get("Delta_IPM2C21A_XPOS");
-  TGraph *g8_x=(TGraph *)f->Get("Delta_IPM2C24A_XPOS");
+  g_fc=(TGraph *)f->Get("FCUP");
+  g1=new TGraph(*g_fc);    // Make a copy, since we'll scale it.
+  g2=(TGraph *)f->Get("Delta_IPM2H00_YPOS");
+  g3=(TGraph *)f->Get("Delta_IPM2H01_YPOS");
+  g4=(TGraph *)f->Get("Delta_IPM2H02_YPOS");
+  g_t=(TGraph *)f->Get("HPS_T");
+  g5 = new TGraph(*g_t);
+  g_sc=(TGraph *)f->Get("HPS_SC");
+  g6 = new TGraph(*g_sc);
+  g7=(TGraph *)f->Get("Delta_IPM2C21A_YPOS");
+  g8=(TGraph *)f->Get("Delta_IPM2C24A_YPOS");
+  
+  g2_x=(TGraph *)f->Get("Delta_IPM2H00_XPOS");
+  g3_x=(TGraph *)f->Get("Delta_IPM2H01_XPOS");
+  g4_x=(TGraph *)f->Get("Delta_IPM2H02_XPOS");
+  g7_x=(TGraph *)f->Get("Delta_IPM2C21A_XPOS");
+  g8_x=(TGraph *)f->Get("Delta_IPM2C24A_XPOS");
 
   f->Close();
   delete f;
@@ -35,10 +60,10 @@ void PlotGraphs(const char * file){
   double hps_sc_scale = 0.16e-5;
   char hps_sc_scale_txt[] = "HPS_SC*0.16*10^{-5}";
 
-  TCanvas *cc_y= new TCanvas("cc_y",fnam+"_Y",1400,500);
+  cc_y= new TCanvas("cc_y",(fnam+"_Y").data(),1400,500);
   cc_y->cd();
 
-  TLatex *t1 = new TLatex(0.05,0.93,fnam+"_Y");
+  TLatex *t1 = new TLatex(0.05,0.93,(fnam+"_Y").data());
   t1->SetTextColor(kBlack);
   t1->Draw();
 
@@ -63,11 +88,11 @@ void PlotGraphs(const char * file){
   t7->Draw();
 
 
-  TPad *p1=new TPad("p1","",0,0,1,1);
-  p1->SetFillColor(0);
-  p1->SetFillStyle(4000);
-  p1->Draw();
-  p1->cd();
+  p1y=new TPad("p1","",0,0,1,1);
+  p1y->SetFillColor(0);
+  p1y->SetFillStyle(4000);
+  p1y->Draw();
+  p1y->cd();
 
   g2->SetTitle("");
   g2->SetLineColor(kRed);
@@ -76,8 +101,8 @@ void PlotGraphs(const char * file){
   //  g2->GetYaxis()->SetLabelOffset(0.055);
   //g2->GetYaxis()->SetAxisColor(kRed);
   g2->GetYaxis()->SetTickSize(0.02);
-  g2->SetMinimum(-1.);
-  g2->SetMaximum(1.);
+  g2->SetMinimum(ymin);
+  g2->SetMaximum(ymax);
   g2->Draw("AL");
 
   for (int i=0;i<g1->GetN();i++) g1->GetY()[i] = g_fc->GetY()[i]*fcup_scale;  //  Scale
@@ -120,10 +145,10 @@ void PlotGraphs(const char * file){
   //mg->Add(g4,"L");
   //mg->Draw()
   
-  TCanvas *cc_x= new TCanvas("cc",fnam+"_X",1400,500);
+  cc_x= new TCanvas("cc",(fnam+"_X").data(),1400,500);
   cc_x->cd();
 
-  TLatex *t1x = new TLatex(0.05,0.93,fnam+"_X");
+  TLatex *t1x = new TLatex(0.05,0.93,(fnam+"_X").data());
   t1x->SetTextColor(kBlack);
   t1x->Draw();
 
@@ -145,7 +170,7 @@ void PlotGraphs(const char * file){
 
   t7->Draw();
 
-  TPad *p1x=new TPad("p1","",0,0,1,1);
+  p1x=new TPad("p1","",0,0,1,1);
   p1x->SetFillColor(0);
   p1x->SetFillStyle(4000);
   p1x->Draw();
@@ -158,8 +183,8 @@ void PlotGraphs(const char * file){
   //  g2_x->GetYaxis()->SetLabelOffset(0.055);
   //g2_x->GetYaxis()->SetAxisColor(kRed);
   g2_x->GetYaxis()->SetTickSize(0.02);
-  g2_x->SetMinimum(-1.);
-  g2_x->SetMaximum(1.);
+  g2_x->SetMinimum(ymin);
+  g2_x->SetMaximum(ymax);
   g2_x->Draw("AL");
 
   g1->Draw("L");
@@ -183,16 +208,47 @@ void PlotGraphs(const char * file){
   g8_x->SetLineColor(kYellow);
 
   cc_y->Update();
-  TFile *fout= new TFile("cc_plots.root","UPDATE");
-  cc_y->Write("cc_y_"+fnam);
-  cc_y->SaveAs("cc_y_"+fnam+".pdf");    
-
   cc_x->Update();
-  cc_x->Write("cc_x_"+fnam);
-  cc_x->SaveAs("cc_x_"+fnam+".pdf");    
 
+  //  fout->Close();
+  //  delete fout;
+  //  gSystem->Exit(1);
+
+}
+
+void MarkTime(string time,int Color=kRed){
+
+  TAxis *xax= g2->GetXaxis();
+  string tmpf(xax->GetTimeFormat());
+  string utc_time_offset = tmpf.substr(tmpf.find("F")+1);
+  TDatime *utc_off = new TDatime(utc_time_offset.data());
+  unsigned long t_off = utc_off->Convert() - 5*60*60;
+ 
+  TDatime *m_time = new TDatime(time.data()); 
+  long t_mark = m_time->Convert() - t_off;
+
+  double max = g2->GetMaximum();
+  double min = g2->GetMinimum();
+  double len = max-min;
+
+  TLine *l = new TLine(t_mark, min-0.1*len, t_mark, max+0.1*len);
+  l->SetLineColor(kRed);
+  l->SetLineWidth(2);
+  p1y->cd();
+  l->Draw();
+  p1x->cd();
+  l->Draw();
+    
+}
+
+void SavePlots(string fnam){
+
+  cc_y->SaveAs(("cc_y_"+fnam+".pdf").data());    
+  cc_x->SaveAs(("cc_x_"+fnam+".pdf").data());    
+
+  TFile *fout= new TFile("cc_plots.root","UPDATE");
+  cc_y->Write( ("cc_y_"+fnam).data());
+  cc_x->Write(("cc_x_"+fnam).data());
   fout->Close();
   delete fout;
-  gSystem->Exit(1);
-
 }
