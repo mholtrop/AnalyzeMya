@@ -20,11 +20,11 @@ def convert_to_float(val):
         if val == "<undefined>":
             out = 0
         else:
-            print "Unexpected value: ",val
+            print("Unexpected value: ",val)
             out= None
 
     return out
-        
+
 def main(argv=None):
     if argv is None:
         argv=sys.argv
@@ -40,15 +40,58 @@ def main(argv=None):
                 'scalerS13b.VAL', # HPS_R
                 'scalerS14b.VAL', # HPS_T
                 'scalerS15b.VAL'] # HPS_SC
+    Trig_Channels = ['B_DAQ_HPS:VTP:rate:00',  # Single-0 Top
+                    'B_DAQ_HPS:VTP:rate:01',  # Single-1
+                    'B_DAQ_HPS:VTP:rate:02',  # Single-2
+                    'B_DAQ_HPS:VTP:rate:03',  # Single-3
+                    'B_DAQ_HPS:VTP:rate:04',  # Single-0
+                    'B_DAQ_HPS:VTP:rate:05',  # Single-1
+                    'B_DAQ_HPS:VTP:rate:06',  # Single-2
+                    'B_DAQ_HPS:VTP:rate:07',  # Single-3
+                    'B_DAQ_HPS:VTP:rate:08',  # Pair-0
+                    'B_DAQ_HPS:VTP:rate:09',  # Pair-1
+                    'B_DAQ_HPS:VTP:rate:10',  # Pair-2
+                    'B_DAQ_HPS:VTP:rate:11',  # Pair-3
+#                    'B_DAQ_HPS:VTP:rate:12',  # LED
+#                    'B_DAQ_HPS:VTP:rate:13',  # Cosmic
+#                    'B_DAQ_HPS:VTP:rate:14',  # Hodoscope
+#                    'B_DAQ_HPS:VTP:rate:15',  # Pulser
+                    'B_DAQ_HPS:VTP:rate:16',  # Multiplicity-0 (2Gamma)
+                    'B_DAQ_HPS:VTP:rate:17',  # Multiplicity-1 (3Gamma)
+                    'B_DAQ_HPS:VTP:rate:18',  # FEE Top
+                    'B_DAQ_HPS:VTP:rate:19',  # FEE Bottom
+                    'B_DAQ_HPS:TSFP:rate:15',  # FCup
+                    'B_DAQ_HPS:TSGTP:sum',    # Trigger Sum
+                    ]
 
     translate = { 'scaler_calc1'  :'FCUP',
                   'scalerS12b.VAL':'HPS_L',
                   'scalerS13b.VAL':'HPS_R',
                   'scalerS14b.VAL':'HPS_T',
-                  'scalerS15b.VAL':'HPS_SC' }
+                  'scalerS15b.VAL':'HPS_SC',
+                  'B_DAQ_HPS:VTP:rate:00':"Single0_Top",
+                  'B_DAQ_HPS:VTP:rate:01':"Single1_Top",
+                  'B_DAQ_HPS:VTP:rate:02':"Single2_Top",
+                  'B_DAQ_HPS:VTP:rate:03':"Single3_Top",
+                  'B_DAQ_HPS:VTP:rate:04':"Single0_Bot",
+                  'B_DAQ_HPS:VTP:rate:05':"Single1_Bot",
+                  'B_DAQ_HPS:VTP:rate:06':"Single2_Bot",
+                  'B_DAQ_HPS:VTP:rate:07':"Single3_Bot",
+                  'B_DAQ_HPS:VTP:rate:08':"Pair0",
+                  'B_DAQ_HPS:VTP:rate:09':"Pair1",
+                  'B_DAQ_HPS:VTP:rate:10':"Pair2",
+                  'B_DAQ_HPS:VTP:rate:11':"Pair3",
+#                  'B_DAQ_HPS:VTP:rate:15':"Pulser",
+                  'B_DAQ_HPS:VTP:rate:16':"Mult0",
+                  'B_DAQ_HPS:VTP:rate:17':"Mult1",
+                  'B_DAQ_HPS:VTP:rate:18':"FEE_Top",
+                  'B_DAQ_HPS:VTP:rate:19':"FEE_Bot",
+                  'B_DAQ_HPS:TSFP:rate:15':"FCup",
+                  'B_DAQ_HPS:TSGTP:sum':"TrigSum"
+                   }
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=
-"""A MYA to ROOT converter. 
+"""A MYA to ROOT converter.
 
 Examples:
 
@@ -67,20 +110,24 @@ Note: If you request a long time span, the myData command will take a long time.
     parser.add_argument('-z','--gzip',action='store_true',help='File to be readin is gzipped.')
     parser.add_argument('-o','--outfile',type=str,help='Name of the output root file.',default=None)
     parser.add_argument('-b','--begin',action='store',type=dtime,help='Begin time, passed on to MYA. Can be relative time. To use negative values, precede with an x as in x-12h',default=None)
-    parser.add_argument('-e','--end'  ,action='store',type=dtime,help='End time, passed on to MYA. Can be relative time as in x-1h',default=None)    
+    parser.add_argument('-e','--end'  ,action='store',type=dtime,help='End time, passed on to MYA. Can be relative time as in x-1h',default=None)
     parser.add_argument('-p','--precision',type=int,help='Number of digits after period for seconds in time. [0]',default=0)
     parser.add_argument('-i','--interactive',action='store_true',help='Show the graph for each channel and pause until <enter>.')
     parser.add_argument('-x','--tryout',action='store_true',help='Show the Mya command but do not excute it, then quit. You can then copy this and pipe it to a file.')
     parser.add_argument('-c','--cutone',type=int,help='Cut the Delta graphs on the current in data item 1 at N nA')
-    parser.add_argument('-d','--debug',action='count',help='Increase debugging verbosity ')
+    parser.add_argument('-d','--debug',action='count',help='Increase debugging verbosity ',default=0)
+    parser.add_argument('-t','--trigger',action="store_true",help="Add the HPS trigger channels to the list of variables.")
     parser.add_argument('epics_channels',nargs='*',help='List the epics channels. If none given, standard HPS BPM set will be used.',default=Channels)
     args = parser.parse_args(argv[1:]) # Drop the program name.
+
+    if args.trigger:
+        args.epics_channels+=Trig_Channels
 
     ## --begin and --end can have a preceding x. If so, scrub it.
 
     if args.begin and ( args.begin[0] == 'x' or args.begin[0] == 'X'):  args.begin=args.begin[1:]
     if args.end   and ( args.end[0] == 'x' or args.end[0] == 'X'):  args.end=args.end[1:]
-                
+
     if args.debug>1:
         print("Arguments parsed:")
         if args.begin: print(" --begin "+str(args.begin))
@@ -102,15 +149,15 @@ Note: If you request a long time span, the myData command will take a long time.
             pipe = subprocess.Popen(command_line,shell=True, bufsize=1024*1024, stdout=subprocess.PIPE)
             ff = pipe.stdout
         else:
-            ff=open(args.file)        
+            ff=open(args.file)
 
         if not args.outfile:
             outfile = args.file[0:args.file.find('.')] +".root"
 
-        
+
     else:
         if args.begin is None or args.end is None:
-            print "Please specify begin and end on the command line, or specify an input file. "
+            print("Please specify begin and end on the command line, or specify an input file. ")
             return(9)
 
         # According to Popen doc, the command line should be split, but this doesn't actually work.
@@ -139,6 +186,8 @@ Note: If you request a long time span, the myData command will take a long time.
     #####  HEADER TRANSLATION #### HPS SPECIFIC  ############
 
     for old,new in translate.items():
+        if args.debug:
+            print("Translate: ",old," to ",new)
         ll = ll.replace(old,new)
 
     ll = ll.replace(".","_") # ROOT is not cool about var names with .
@@ -146,23 +195,23 @@ Note: If you request a long time span, the myData command will take a long time.
     headers = ll.split()[1:] # First is "Date"
 
     ####### READ the first line from the data #########
-    
+
     ll=ff.readline()         # Values, first 2 are Date Time
 
     if args.debug:
         print("Second line:"+str(ll))
 
     (date,time) = ll.split()[0:2]
-    
+
     if args.precision:
         datetime_format = "%Y-%m-%d %H:%M:%S.%f"
     else:
         datetime_format = "%Y-%m-%d %H:%M:%S"
 
-    Zero_time = datetime.datetime.strptime(date+" "+time,datetime_format) 
+    Zero_time = datetime.datetime.strptime(date+" "+time,datetime_format)
     axis_start = ROOT.TDatime(Zero_time.year,Zero_time.month,Zero_time.day,Zero_time.hour,Zero_time.minute,Zero_time.second)
     ROOT.gStyle.SetTimeOffset(axis_start.Convert())
-    
+
     tstamp=[]
     graph_data=[ []  for i in range(len(headers)) ]   # Create an empty array of arrays to store the results. We want column-wise storage!
 
@@ -178,7 +227,7 @@ Note: If you request a long time span, the myData command will take a long time.
     #        root_tree.Branch(name,dat,name+"/D")
 
     for i in range(len(headers)):
-        if args.debug: print "Tree Booking ",headers[i]
+        if args.debug: print("Tree Booking ",headers[i])
         root_tree.Branch(headers[i],tree_data[i],headers[i]+"/D")
 
     #
@@ -190,7 +239,7 @@ Note: If you request a long time span, the myData command will take a long time.
     # We can handle this by storing the last line. If the current line is a newer time then we process the last line.
 
     repeat_time_counter=0
-    last_line = ll    
+    last_line = ll
     (date,time) = last_line.split()[0:2]
 
     last_time = datetime.datetime.strptime(date+" "+time,datetime_format)
@@ -205,26 +254,26 @@ Note: If you request a long time span, the myData command will take a long time.
             repeat_time_counter += 1
             last_time = this_time
             last_line = ll
-            if args.debug > 3: print "Skip time: ",date,time
+            if args.debug > 3: print("Skip time: ",date,time)
             continue                     # Get the next line, don't process.
 
         # We are at a new time then
 
-        if args.debug > 3: print "Proc time: ",date,time
+        if args.debug > 3: print("Proc time: ",date,time)
 
         repeat_time_counter=0
 
         values =  last_line.split()[2:]   # We process the LAST LINE. First 2 entries are data and time, so skip.
 
         if len(values) != len(headers):
-            print "Incorrect data length in line: (",len(values)," != ",len(headers),") \n",ll
+            print("Incorrect data length in line: (",len(values)," != ",len(headers),") \n",ll)
             sys.exit(9)
-     
+
         for i in range(len(values)):     # Needed to get the data into the TTree
             tree_data[i][0] = convert_to_float(values[i])
 
 
-        delta_time = (last_time - Zero_time).total_seconds() 
+        delta_time = (last_time - Zero_time).total_seconds()
         tree_delta_time[0] = delta_time
         last_time = this_time           # Set time for next iteration
 
@@ -232,20 +281,20 @@ Note: If you request a long time span, the myData command will take a long time.
         root_tree.Fill()
 
         for i in range(len(values)):
-            graph_data[i].append(convert_to_float(values[i]))    # Store column wise.            
-        
-    
+            graph_data[i].append(convert_to_float(values[i]))    # Store column wise.
+
+
     # END of file read. Now process the data into the graphs.
 
     gr_x = np.array(tstamp,dtype='float64')
-        
-    print "Data contained ",len(tstamp)," timestamp lines."
+
+    print("Data contained ",len(tstamp)," timestamp lines.")
 
     graphs=[]
 
     for i in range(len(headers)):
         gr_y = np.array(graph_data[i],dtype="float64")
-        print "Creating graph ",i+1," for ",headers[i]
+        print("Creating graph ",i+1," for ",headers[i])
         gr = ROOT.TGraph(len(gr_x),gr_x,gr_y)
         gr.SetTitle(headers[i])
         gr.GetXaxis().SetTimeDisplay(1)
@@ -256,7 +305,7 @@ Note: If you request a long time span, the myData command will take a long time.
             gr.Draw("AL")
             canv.Update()
             sys.stdin.readline()
-        
+
         gr.Write(headers[i])  # Write to the file with proper name.
 
         ### Graphs of deviation from mean.
@@ -296,9 +345,9 @@ Note: If you request a long time span, the myData command will take a long time.
 
     ####################### Plotting Section ############################
 
-    
-    
-    
+
+
+
 
 if __name__ == "__main__":
     sys.exit(main())
