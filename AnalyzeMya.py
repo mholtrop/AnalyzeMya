@@ -86,8 +86,7 @@ def main(argv=None):
                   'B_DAQ_HPS:VTP:rate:17':"Mult1",
                   'B_DAQ_HPS:VTP:rate:18':"FEE_Top",
                   'B_DAQ_HPS:VTP:rate:19':"FEE_Bot",
-                  'B_DAQ_HPS:TSFP:rate:15':"FCup",
-                  'B_DAQ_HPS:TSGTP:sum':"TrigSum"
+                  'B_DAQ_HPS:TSFP:rate:15':"FCup"
                    }
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=
