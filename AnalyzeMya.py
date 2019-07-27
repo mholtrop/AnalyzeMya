@@ -61,7 +61,6 @@ def main(argv=None):
                     'B_DAQ_HPS:VTP:rate:18',  # FEE Top
                     'B_DAQ_HPS:VTP:rate:19',  # FEE Bottom
                     'B_DAQ_HPS:TSFP:rate:15',  # FCup
-                    'B_DAQ_HPS:TSGTP:sum',    # Trigger Sum
                     ]
 
     translate = { 'scaler_calc1'  :'FCUP',
